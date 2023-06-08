@@ -58,37 +58,29 @@ async function run() {
 
     }
 }
+run().catch(err => console.log(err))
+
+async function run() {
+    try {
+        const serviceCollection = client.db("azad-fruit-shop").collection('services');
+
+        app.get('/services', async (req, res) => {
+            const cursor = serviceCollection.find({});
+            const services = await cursor.toArray();
+            res.send(services);
+        });
+
+
+    }
+    finally {
+
+    }
+}
+
 
 run().catch(err => console.log(err))
 
 
-
-
-// const comments = [
-//     { name: 'Neela', comment: 'very good' },
-//     { name: 'Neela', comment: 'very good' },
-//     { name: 'Neela', comment: 'very good' },
-//     { name: 'Neela', comment: 'very good' },
-//     { name: 'Neela', comment: 'very good' },
-//     { name: 'Neela', comment: 'very good' },
-//     { name: 'Neela', comment: 'very good' },
-//     { name: 'Neela', comment: 'very good' }
-// ]
-
-
-// app.get('/comment', (req, res) => {
-//     res.send(comments);
-// });
-
-// app.post('/comment', (req, res) => {
-//     console.log('post api called');
-//     const comment = req.body;
-//     //comment.name = comments.length + 1;
-//     comments.push(comment);
-//     // console.log(req.body);
-//     console.log(comment);
-//     res.send(comment);
-// });
 app.listen(port, () => {
     console.log(`simple node running on port ${port}`);
 })
