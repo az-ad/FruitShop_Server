@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+// const teachableMachine = require("@sashido/teachablemachine-node");
+const teachableMachine = require("@sashido/teachablemachine-node")
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
@@ -20,40 +22,15 @@ app.use(express.json());
 
 const uri = "mongodb+srv://dbusercomment:6omsAJKuXriNDCnh@cluster0.d00iw.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-// client.connect(err => {
-//     const collection = client.db("azad-fruit-shop").collection("comments");
-//     // perform actions on the collection object
-//     console.log('database connected');
-//     client.close();
-// });
 
-// async function run() {
-//     try {
-//         const commentCollection = client.db("azad-fruit-shop").collection('comments');
-//         app.get('/comment', async (req, res) => {
-//             const cursor = commentCollection.find({});
-//             const comments = await cursor.toArray();
-//             res.send(comments);
-//         });
-//         app.post('/comment', async (req, res) => {
-//             console.log('post api called');
-//             const comment = req.body;
-//             const result = await commentCollection.insertOne(comment);
-//             console.log(result);
-//             comment._id = result.insertedId;
-
-//             res.send(comment);
-//         });
-
-//     }
-//     finally {
-
-//     }
-// }
-// run().catch(err => console.log(err))
 
 async function run() {
+
     try {
+        const model = new teachableMachine({
+            modelUrl: "https://teachablemachine.withgoogle.com/models/AokBBWx0A/",
+        });
+
         const serviceCollection = client.db("azad-fruit-shop").collection('services');
         const commentCollection = client.db("azad-fruit-shop").collection('comments');
         const userCollection = client.db("azad-fruit-shop").collection('users');
@@ -117,6 +94,28 @@ async function run() {
 
             res.send(post);
         });
+
+
+        //-----------------------classification------------------//
+        app.post("/classification", async (req, res) => {
+            const url = req.body.url;
+            // const url = req.body.imgData.url
+            console.log(url);
+
+            return await model
+                .classify({
+                    imageUrl: url,
+                })
+                .then((predictions) => {
+                    console.log(predictions);
+                    return res.send(predictions);
+                })
+                .catch((e) => {
+                    console.error(e);
+                    res.status(500).send("Something went wrong!");
+                });
+        });
+
 
         //-------------rating----------------------------------------------//
         app.get('/rating', async (req, res) => {
